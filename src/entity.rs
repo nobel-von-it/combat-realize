@@ -4,10 +4,11 @@ pub trait New {
 }
 pub trait Fight {
     fn get_damage(&mut self, damage: u16);
+    fn get_percent_hp(&self) -> u16;
 }
 
 
-const ARMOR_100_PR: u16 = u16::max_value();
+const ARMOR_100_PR: u16 = u16::MAX;
 
 pub struct Entity {
     pub name: String,
@@ -29,6 +30,22 @@ impl New for Entity {
         }
     }
 }
+impl Fight for Entity {
+    fn get_damage(&mut self, damage: u16) {
+        if self.now_hp > damage {
+            self.now_hp -= damage
+        } else {
+            self.now_hp = 0
+        }
+    }
+    fn get_percent_hp(&self) -> u16 {
+        if self.full_hp == self.now_hp {
+            100
+        } else {
+            self.now_hp * 100 / self.full_hp
+        }
+    }
+}
 
 pub struct Player {
     pub entity: Entity,
@@ -36,11 +53,6 @@ pub struct Player {
 impl New for Player {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self {
         Self { entity: Entity::new(name, full_hp, damage, armor, dodge)}
-    }
-}
-impl Fight for Player {
-    fn get_damage(&mut self, damage: u16) {
-        let real_damage = damage - (damage as f32 / )
     }
 }
 pub struct Monster {

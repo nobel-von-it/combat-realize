@@ -13,14 +13,20 @@ use ratatui::{
     backend::{Backend, CrosstermBackend},
     Frame, Terminal,
 };
+use crate::combat::Combat;
+use crate::entity::{Monster, New, Player};
 
 fn main() -> anyhow::Result<()> {
     enable_raw_mode()?;
     execute!(stdout(), EnterAlternateScreen, EnableMouseCapture)?;
 
     let mut t = Terminal::new(CrosstermBackend::new(stdout()))?;
+    let mut combat = Combat::new(
+        Player::new("held".to_string(), 100, 10, 10, 1),
+        Monster::new("Ugly Bastard".to_string(), 50, 10, 10, 1)
+    );
 
-    let res = run(&mut t);
+    let res = run(&mut t, &mut combat);
 
     disable_raw_mode()?;
     execute!(t.backend_mut(), LeaveAlternateScreen, DisableMouseCapture)?;
@@ -29,15 +35,18 @@ fn main() -> anyhow::Result<()> {
     res?;
     Ok(())
 }
-fn run<B: Backend>(t: &mut Terminal<B>) -> anyhow::Result<()> {
+fn run<B: Backend>(t: &mut Terminal<B>, combat: &mut Combat) -> anyhow::Result<()> {
     loop {
-        t.draw(|f| ui(f))?;
+        t.draw(|f| combat.draw(f))?;
         if let Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Release {
                 continue;
             }
             match key.code {
                 KeyCode::Esc => break,
+                KeyCode::Enter => {
+                    combat.hit()
+                }
                 _ => {}
             }
         }
