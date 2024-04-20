@@ -1,5 +1,5 @@
-use ratatui::widgets::HighlightSpacing;
-use rand::{random, Rng};
+
+use rand::{Rng};
 
 pub trait New {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self;
@@ -34,7 +34,7 @@ impl New for Entity {
         } else {
             armor
         };
-        let real_dodge = if dodge > DODGE_CAP {
+        let _real_dodge = if dodge > DODGE_CAP {
             DODGE_CAP
         } else {
             dodge

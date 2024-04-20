@@ -1,6 +1,6 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::style::{Color, Stylize};
+use ratatui::style::{Stylize};
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, Gauge, Paragraph};
 use crate::entity::{Monster, Player, New, Fight};

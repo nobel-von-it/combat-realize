@@ -2,7 +2,7 @@
 mod combat;
 mod entity;
 
-use std::cmp::PartialEq;
+
 use std::io::stdout;
 
 use crossterm::{
@@ -11,8 +11,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{
-    backend::{Backend, CrosstermBackend},
-    Frame, Terminal,
+    backend::{Backend, CrosstermBackend}, Terminal,
 };
 use crate::combat::{Combat};
 use crate::entity::{Action, Monster, New, Player};
