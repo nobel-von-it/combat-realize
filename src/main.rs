@@ -53,7 +53,11 @@ fn run<B: Backend>(t: &mut Terminal<B>, combat: &mut Combat) -> anyhow::Result<(
                         KeyCode::Esc => break,
                         KeyCode::Enter => match combat.player.get_action() {
                             Action::Hit => combat.hit_monster(),
-                            Action::Defense => {},
+                            Action::Defense => {
+                                // it needs to realize step system player and monster
+                                // if this action is pressed, in next step if a monster is attacking, player will get less damage
+                                // but right now this will not work
+                            },
                             Action::Info => {
                                 // make something in draw
                                 // show player and monster stats

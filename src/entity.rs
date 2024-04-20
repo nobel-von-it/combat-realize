@@ -51,6 +51,8 @@ impl New for Entity {
 }
 impl Fight for Entity {
     fn get_damage(&mut self, damage: u16) {
+        // add chance error, that every damage was difference
+        // if damage is 10, then real_damage until armor calculating will from 8 to 12 (+-2 is error)
         let real_damage = (100 - self.armor) * damage / 100;
         if self.dodge < rand::thread_rng().gen_range(0..=100) as u16 {
             if self.now_hp > real_damage {
