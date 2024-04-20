@@ -24,7 +24,7 @@ fn main() -> anyhow::Result<()> {
     let mut t = Terminal::new(CrosstermBackend::new(stdout()))?;
     let mut combat = Combat::new(
         Player::new("Held".to_string(), 100, 10, 10, 1),
-        Monster::new("Ugly Bastard".to_string(), 50, 10, 10, 1)
+        Monster::new("Ugly Bastard".to_string(), 50, 10, 10, 10)
     );
 
     let res = run(&mut t, &mut combat);
@@ -54,7 +54,14 @@ fn run<B: Backend>(t: &mut Terminal<B>, combat: &mut Combat) -> anyhow::Result<(
                         KeyCode::Enter => match combat.player.get_action() {
                             Action::Hit => combat.hit_monster(),
                             Action::Defense => {},
+                            Action::Info => {
+                                // make something in draw
+                                // show player and monster stats
+                            },
                             Action::Run => break,
+                        }
+                        KeyCode::Tab => {
+                            // make same as Action::Info
                         }
                         _ => {}
                     }
