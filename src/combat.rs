@@ -1,5 +1,6 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::style::{Color, Stylize};
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, Gauge, Paragraph};
 use crate::entity::{Monster, Player, New, Fight};
@@ -71,6 +72,11 @@ impl Combat {
         let monster_display = Text::raw(TMP_MONSTER);
 
 
+        // actions
+
+
+
+
         // names
         let player_name = Paragraph::new(self.player.entity.name.clone()).centered();
         let monster_name = Paragraph::new(self.monster.entity.name.clone()).centered();
@@ -80,18 +86,29 @@ impl Combat {
             .direction(Direction::Vertical)
             .constraints([
                 Constraint::Percentage(10),
-                Constraint::Percentage(90),
+                Constraint::Percentage(60),
+                Constraint::Percentage(30)
             ]).split(f.size());
         let enemy_display_layout = half_rect(Direction::Horizontal).split(full_layout[1]);
 
         let player_display_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Length(1), Constraint::Percentage(50), Constraint::Length(1), Constraint::Percentage(50)])
+            .constraints([Constraint::Length(1), Constraint::Percentage(100), Constraint::Length(1)])
             .split(enemy_display_layout[0]);
         let monster_display_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Length(1), Constraint::Percentage(50), Constraint::Length(1), Constraint::Percentage(50)])
+            .constraints([Constraint::Length(1), Constraint::Percentage(100), Constraint::Length(1)])
             .split(enemy_display_layout[1]);
+
+
+        let mut constraints = vec![];
+        for _ in 0..self.player.actions.len() {
+            constraints.push(Constraint::Length(1))
+        }
+        let actions_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(constraints)
+            .split(full_layout[2]);
 
         /* Renders */
         f.render_widget(action_describe, full_layout[0]);
@@ -105,6 +122,16 @@ impl Combat {
         f.render_widget(monster_name, monster_display_layout[0]);
         f.render_widget(monster_display, monster_display_layout[1]);
         f.render_widget(monster_hp, monster_display_layout[2]);
+
+        // Actions
+        for (i, act) in self.player.actions.iter().enumerate() {
+            let par = Paragraph::new(format!("{}. {:?}", i+1, act));
+            if i == self.player.select {
+                f.render_widget(par.on_dark_gray(), actions_layout[i])
+            } else {
+                f.render_widget(par, actions_layout[i])
+            }
+        }
 
         /* Check win/lose */
         if self.player.entity.now_hp == 0 {

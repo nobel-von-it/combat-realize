@@ -15,7 +15,7 @@ use ratatui::{
     Frame, Terminal,
 };
 use crate::combat::{Combat};
-use crate::entity::{Monster, New, Player};
+use crate::entity::{Action, Monster, New, Player};
 
 fn main() -> anyhow::Result<()> {
     enable_raw_mode()?;
@@ -48,10 +48,13 @@ fn run<B: Backend>(t: &mut Terminal<B>, combat: &mut Combat) -> anyhow::Result<(
                     break
                 } else {
                     match key.code {
+                        KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('k') => combat.player.up(),
+                        KeyCode::Down | KeyCode::Char('s') | KeyCode::Char('j') => combat.player.down(),
                         KeyCode::Esc => break,
-                        KeyCode::Enter => {
-                            combat.hit_monster();
-                            combat.hit_player();
+                        KeyCode::Enter => match combat.player.get_action() {
+                            Action::Hit => combat.hit_monster(),
+                            Action::Defense => {},
+                            Action::Run => break,
                         }
                         _ => {}
                     }

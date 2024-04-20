@@ -1,3 +1,4 @@
+use ratatui::widgets::HighlightSpacing;
 
 pub trait New {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self;
@@ -47,12 +48,40 @@ impl Fight for Entity {
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum Action {
+    Hit,
+    Defense,
+    Run,
+}
+
 pub struct Player {
     pub entity: Entity,
+    pub actions: Vec<Action>,
+    pub select: usize,
 }
 impl New for Player {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self {
-        Self { entity: Entity::new(name, full_hp, damage, armor, dodge)}
+        Self {
+            entity: Entity::new(name, full_hp, damage, armor, dodge),
+            actions: vec![Action::Hit, Action::Defense, Action::Run],
+            select: 0
+        }
+    }
+}
+impl Player {
+    pub fn up(&mut self) {
+        if self.select > 0 {
+            self.select -= 1
+        }
+    }
+    pub fn down(&mut self) {
+        if self.select < self.actions.len() {
+            self.select += 1
+        }
+    }
+    pub fn get_action(&self) -> Action {
+        self.actions[self.select].clone()
     }
 }
 pub struct Monster {
