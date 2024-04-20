@@ -1,9 +1,8 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::style::Style;
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, Gauge, Paragraph};
-use crate::entity::{Monster, Player, Entity, New, Fight};
+use crate::entity::{Monster, Player, New, Fight};
 
 const PL_DISPL: &str = r#"
            O
@@ -30,17 +29,11 @@ const LOSE: &str = r#"
  |___/|_\___\__,_(_|_)
 "#;
 
-#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
-pub enum Step {
-    Player,
-    Monster
-}
 
 pub struct Combat {
     pub text: String,
     pub player: Player,
     pub monster: Monster,
-    pub step: Step,
 }
 impl Combat {
     pub fn new(player: Player, monster: Monster) -> Self {
@@ -48,7 +41,6 @@ impl Combat {
             text: String::new(),
             player,
             monster,
-            step: Step::Player
         }
     }
     pub fn hit_monster(&mut self) {
@@ -59,12 +51,6 @@ impl Combat {
     }
     pub fn is_fin(&self) -> bool {
         self.player.entity.now_hp == 0 || self.monster.entity.now_hp == 0
-    }
-    pub fn toggle_step(&mut self) {
-        match self.step {
-            Step::Player => self.step = Step::Monster,
-            Step::Monster => self.step = Step::Player,
-        }
     }
     pub fn draw(&self, f: &mut Frame) {
         /* Widgets */
@@ -84,30 +70,41 @@ impl Combat {
             .block(Block::default().borders(Borders::RIGHT));
         let monster_display = Text::raw(TMP_MONSTER);
 
+
+        // names
+        let player_name = Paragraph::new(self.player.entity.name.clone()).centered();
+        let monster_name = Paragraph::new(self.monster.entity.name.clone()).centered();
+
         // Layouts
         let full_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
                 Constraint::Percentage(10),
-                Constraint::Percentage(60),
-                Constraint::Percentage(30)
+                Constraint::Percentage(90),
             ]).split(f.size());
         let enemy_display_layout = half_rect(Direction::Horizontal).split(full_layout[1]);
+
         let player_display_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(70), Constraint::Max(1)])
+            .constraints([Constraint::Length(1), Constraint::Percentage(50), Constraint::Length(1), Constraint::Percentage(50)])
             .split(enemy_display_layout[0]);
         let monster_display_layout = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Percentage(70), Constraint::Max(1)])
+            .constraints([Constraint::Length(1), Constraint::Percentage(50), Constraint::Length(1), Constraint::Percentage(50)])
             .split(enemy_display_layout[1]);
 
         /* Renders */
         f.render_widget(action_describe, full_layout[0]);
-        f.render_widget(player_display, player_display_layout[0]);
-        f.render_widget(monster_display, monster_display_layout[0]);
-        f.render_widget(player_hp, player_display_layout[1]);
-        f.render_widget(monster_hp, monster_display_layout[1]);
+
+        // Player
+        f.render_widget(player_name, player_display_layout[0]);
+        f.render_widget(player_display, player_display_layout[1]);
+        f.render_widget(player_hp, player_display_layout[2]);
+
+        // Monster
+        f.render_widget(monster_name, monster_display_layout[0]);
+        f.render_widget(monster_display, monster_display_layout[1]);
+        f.render_widget(monster_hp, monster_display_layout[2]);
 
         /* Check win/lose */
         if self.player.entity.now_hp == 0 {
