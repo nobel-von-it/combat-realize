@@ -17,21 +17,54 @@ const TMP_MONSTER: &str = r#"
     =[]=
      ||
 "#;
+const WIN: &str = r#"
+ __      ___      _ _
+ \ \    / (_)_ _ | | |
+  \ \/\/ /| | ' \|_|_|
+   \_/\_/ |_|_||_(_|_)
+"#;
+const LOSE: &str = r#"
+  ___  _        _
+ |   \(_)___ __| |
+ | |) | / -_) _` |_ _
+ |___/|_\___\__,_(_|_)
+"#;
+
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+pub enum Step {
+    Player,
+    Monster
+}
+
 pub struct Combat {
     pub text: String,
     pub player: Player,
     pub monster: Monster,
+    pub step: Step,
 }
 impl Combat {
     pub fn new(player: Player, monster: Monster) -> Self {
         Self {
             text: String::new(),
             player,
-            monster
+            monster,
+            step: Step::Player
         }
     }
-    pub fn hit(&mut self) {
+    pub fn hit_monster(&mut self) {
         self.monster.entity.get_damage(self.player.entity.damage)
+    }
+    pub fn hit_player(&mut self) {
+        self.player.entity.get_damage(self.monster.entity.damage)
+    }
+    pub fn is_fin(&self) -> bool {
+        self.player.entity.now_hp == 0 || self.monster.entity.now_hp == 0
+    }
+    pub fn toggle_step(&mut self) {
+        match self.step {
+            Step::Player => self.step = Step::Monster,
+            Step::Monster => self.step = Step::Player,
+        }
     }
     pub fn draw(&self, f: &mut Frame) {
         /* Widgets */
@@ -59,7 +92,7 @@ impl Combat {
                 Constraint::Percentage(60),
                 Constraint::Percentage(30)
             ]).split(f.size());
-        let enemy_display_layout = halfing(Direction::Horizontal).split(full_layout[1]);
+        let enemy_display_layout = half_rect(Direction::Horizontal).split(full_layout[1]);
         let player_display_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([Constraint::Percentage(70), Constraint::Max(1)])
@@ -75,9 +108,19 @@ impl Combat {
         f.render_widget(monster_display, monster_display_layout[0]);
         f.render_widget(player_hp, player_display_layout[1]);
         f.render_widget(monster_hp, monster_display_layout[1]);
+
+        /* Check win/lose */
+        if self.player.entity.now_hp == 0 {
+            let lose_display = Paragraph::new(LOSE).centered();
+            f.render_widget(lose_display, centered_rect(30, 30, f.size()))
+        }
+        if self.monster.entity.now_hp == 0 {
+            let win_display = Paragraph::new(WIN).centered();
+            f.render_widget(win_display, centered_rect(30, 30, f.size()))
+        }
     }
 }
-fn halfing(direction: Direction) -> Layout {
+fn half_rect(direction: Direction) -> Layout {
     Layout::default()
         .direction(direction)
         .constraints([

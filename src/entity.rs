@@ -63,3 +63,8 @@ impl New for Monster {
         Self { entity: Entity::new(name, full_hp, damage, armor, dodge)}
     }
 }
+impl Monster {
+    pub fn ai_step(&mut self) {
+
+    }
+}
