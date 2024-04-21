@@ -1,9 +1,9 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
-use ratatui::style::{Stylize};
+use ratatui::style::Stylize;
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, Gauge, Paragraph};
-use crate::entity::{Monster, Player, New, Fight};
+use crate::entity::{Action, Fight, Monster, New, Player};
 
 const PL_DISPL: &str = r#"
            O
@@ -30,7 +30,6 @@ const LOSE: &str = r#"
  |___/|_\___\__,_(_|_)
 "#;
 
-
 pub struct Combat {
     pub text: String,
     pub player: Player,
@@ -45,10 +44,12 @@ impl Combat {
         }
     }
     pub fn hit_monster(&mut self) {
-        self.monster.entity.get_damage(self.player.entity.damage)
+        let text = self.monster.entity.get_damage(self.player.entity.damage);
+        self.text = text;
     }
     pub fn hit_player(&mut self) {
-        self.player.entity.get_damage(self.monster.entity.damage)
+        let text = self.player.entity.get_damage(self.monster.entity.damage);
+        self.text = text;
     }
     pub fn is_fin(&self) -> bool {
         self.player.entity.now_hp == 0 || self.monster.entity.now_hp == 0

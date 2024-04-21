@@ -1,11 +1,11 @@
 
-use rand::{Rng};
+use rand::Rng;
 
 pub trait New {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self;
 }
 pub trait Fight {
-    fn get_damage(&mut self, damage: u16);
+    fn get_damage(&mut self, damage: u16) -> String;
     fn get_percent_hp(&self) -> u16;
 }
 
@@ -13,11 +13,10 @@ pub trait Fight {
 // Percentage caps
 const ARMOR_CAP: u16 = 50;
 const DODGE_CAP: u16 = 20;
+const ERROR_RANGE_PERCENTAGE: u16 = 20;
 
 // Default value caps
 const DAMAGE_CAP: u16 = u16::MAX;
-const ERROR_RANGE_CAP: u16 = 5;
-
 
 pub struct Entity {
     pub name: String,
@@ -50,17 +49,28 @@ impl New for Entity {
     }
 }
 impl Fight for Entity {
-    fn get_damage(&mut self, damage: u16) {
+    fn get_damage(&mut self, damage: u16) -> String {
         // add chance error, that every damage was difference
         // if damage is 10, then real_damage until armor calculating will from 8 to 12 (+-2 is error)
-        let real_damage = (100 - self.armor) * damage / 100;
+
+        let error_less_damage = damage * (100 - ERROR_RANGE_PERCENTAGE) / 100;
+        let error_more_damage = damage * (100 + ERROR_RANGE_PERCENTAGE) / 100;
+
+        let damage_with_errors = rand::thread_rng().gen_range(error_less_damage..=error_more_damage);
+
+        let real_damage = (100 - self.armor) * damage_with_errors / 100;
         if self.dodge < rand::thread_rng().gen_range(0..=100) as u16 {
             if self.now_hp > real_damage {
                 self.now_hp -= real_damage
             } else {
                 self.now_hp = 0
             }
+            if self.now_hp == 0 {
+                return format!("{} погибает в муках.", self.name)
+            }
+            return format!("{} получил {} урона.", self.name, real_damage)
         }
+        format!("{} увернулся.", self.name)
     }
     fn get_percent_hp(&self) -> u16 {
         self.now_hp * 100 / self.full_hp

@@ -13,7 +13,7 @@ use crossterm::{
 use ratatui::{
     backend::{Backend, CrosstermBackend}, Terminal,
 };
-use crate::combat::{Combat};
+use crate::combat::Combat;
 use crate::entity::{Action, Monster, New, Player};
 
 fn main() -> anyhow::Result<()> {
@@ -62,6 +62,7 @@ fn run<B: Backend>(t: &mut Terminal<B>, combat: &mut Combat) -> anyhow::Result<(
                                 // show player and monster stats
                             },
                             Action::Run => break,
+                            _ => {},
                         }
                         KeyCode::Tab => {
                             // make same as Action::Info
