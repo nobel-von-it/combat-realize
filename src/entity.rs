@@ -96,7 +96,7 @@ impl Player {
         }
     }
     pub fn down(&mut self) {
-        if self.select < self.actions.len() {
+        if self.select < self.actions.len() - 1 {
             self.select += 1
         }
     }
@@ -115,5 +115,11 @@ impl New for Monster {
     }
 }
 impl Monster {
-    pub fn ai_analizeer(&self, player: &Player) {}
+    pub fn get_monster_action(&self, player: &Player) -> Action {
+        if self.entity.full_hp * 3 < player.entity.full_hp {
+            Action::Run
+        } else {
+            Action::Hit
+        }
+    }
 }

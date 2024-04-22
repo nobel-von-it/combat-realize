@@ -1,4 +1,7 @@
+use std::time::Duration;
+
 use crate::entity::{Action, Fight, Monster, New, Player};
+use rand::Rng;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::Stylize;
 use ratatui::text::Text;
@@ -30,17 +33,51 @@ const LOSE: &str = r#"
  |___/|_\___\__,_(_|_)
 "#;
 
+const DEFAULT_TIME: Duration = Duration::from_secs(1);
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Step {
+    Player,
+    Monster,
+}
+pub struct StepInfo {
+    pub step: Step,
+    pub counter: u16,
+    pub time: Duration,
+}
+impl StepInfo {
+    pub fn new() -> Self {
+        let step = if 30 > rand::thread_rng().gen_range(0..=100) {
+            Step::Monster
+        } else {
+            Step::Player
+        };
+        Self {
+            step,
+            counter: 0,
+            time: DEFAULT_TIME,
+        }
+    }
+}
+
 pub struct Combat {
     pub text: String,
     pub player: Player,
     pub monster: Monster,
+    pub step_info: StepInfo,
 }
 impl Combat {
     pub fn new(player: Player, monster: Monster) -> Self {
+        let step_info = StepInfo::new();
+        let text = match step_info.step {
+            Step::Monster => format!("{} ходит первым.", &monster.entity.name),
+            Step::Player => format!("{} ходит первым.", &player.entity.name),
+        };
         Self {
-            text: String::new(),
+            text,
             player,
             monster,
+            step_info,
         }
     }
     pub fn hit_monster(&mut self) {
@@ -51,11 +88,26 @@ impl Combat {
         let text = self.player.entity.get_damage(self.monster.entity.damage);
         self.text = text;
     }
+    pub fn run_away(&mut self) {
+        match self.step_info.step {
+            Step::Monster => {
+                self.monster.entity.now_hp = 0;
+                self.text = format!("{} убежал.", self.monster.entity.name);
+            }
+            Step::Player => {
+                self.player.entity.now_hp = 0;
+                self.text = format!("{} убежал.", self.player.entity.name);
+            }
+        }
+    }
     pub fn is_fin(&self) -> bool {
         self.player.entity.now_hp == 0 || self.monster.entity.now_hp == 0
     }
-    pub fn monster_ai_analizer(&self) {
-        self.monster.ai_analizeer(&self.player)
+    pub fn toggle_step(&mut self) {
+        match self.step_info.step {
+            Step::Monster => self.step_info.step = Step::Player,
+            Step::Player => self.step_info.step = Step::Monster,
+        }
     }
     pub fn draw(&self, f: &mut Frame) {
         /* Widgets */
@@ -142,12 +194,12 @@ impl Combat {
 
         /* Check win/lose */
         if self.player.entity.now_hp == 0 {
-            let lose_display = Paragraph::new(LOSE).centered();
-            f.render_widget(lose_display, centered_rect(30, 30, f.size()))
+            let lose_display = Paragraph::new(LOSE);
+            f.render_widget(lose_display, centered_rect(15, 10, f.size()))
         }
         if self.monster.entity.now_hp == 0 {
-            let win_display = Paragraph::new(WIN).centered();
-            f.render_widget(win_display, centered_rect(30, 30, f.size()))
+            let win_display = Paragraph::new(WIN);
+            f.render_widget(win_display, centered_rect(15, 10, f.size()))
         }
     }
 }
