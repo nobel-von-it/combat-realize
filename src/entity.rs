@@ -1,4 +1,3 @@
-
 use rand::Rng;
 
 pub trait New {
@@ -8,7 +7,6 @@ pub trait Fight {
     fn get_damage(&mut self, damage: u16) -> String;
     fn get_percent_hp(&self) -> u16;
 }
-
 
 // Percentage caps
 const ARMOR_CAP: u16 = 50;
@@ -28,16 +26,8 @@ pub struct Entity {
 }
 impl New for Entity {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self {
-        let real_armor = if armor > ARMOR_CAP {
-            ARMOR_CAP
-        } else {
-            armor
-        };
-        let _real_dodge = if dodge > DODGE_CAP {
-            DODGE_CAP
-        } else {
-            dodge
-        };
+        let real_armor = if armor > ARMOR_CAP { ARMOR_CAP } else { armor };
+        let _real_dodge = if dodge > DODGE_CAP { DODGE_CAP } else { dodge };
         Self {
             name,
             full_hp,
@@ -56,7 +46,8 @@ impl Fight for Entity {
         let error_less_damage = damage * (100 - ERROR_RANGE_PERCENTAGE) / 100;
         let error_more_damage = damage * (100 + ERROR_RANGE_PERCENTAGE) / 100;
 
-        let damage_with_errors = rand::thread_rng().gen_range(error_less_damage..=error_more_damage);
+        let damage_with_errors =
+            rand::thread_rng().gen_range(error_less_damage..=error_more_damage);
 
         let real_damage = (100 - self.armor) * damage_with_errors / 100;
         if self.dodge < rand::thread_rng().gen_range(0..=100) as u16 {
@@ -66,9 +57,9 @@ impl Fight for Entity {
                 self.now_hp = 0
             }
             if self.now_hp == 0 {
-                return format!("{} погибает в муках.", self.name)
+                return format!("{} погибает в муках.", self.name);
             }
-            return format!("{} получил {} урона.", self.name, real_damage)
+            return format!("{} получил {} урона.", self.name, real_damage);
         }
         format!("{} увернулся.", self.name)
     }
@@ -94,7 +85,7 @@ impl New for Player {
         Self {
             entity: Entity::new(name, full_hp, damage, armor, dodge),
             actions: vec![Action::Hit, Action::Defense, Action::Info, Action::Run],
-            select: 0
+            select: 0,
         }
     }
 }
@@ -118,11 +109,11 @@ pub struct Monster {
 }
 impl New for Monster {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self {
-        Self { entity: Entity::new(name, full_hp, damage, armor, dodge)}
+        Self {
+            entity: Entity::new(name, full_hp, damage, armor, dodge),
+        }
     }
 }
 impl Monster {
-    pub fn ai_step(&mut self) {
-
-    }
+    pub fn ai_analizeer(&self, player: &Player) {}
 }
