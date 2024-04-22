@@ -11,12 +11,14 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use rand::Rng;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
     Terminal,
 };
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     enable_raw_mode()?;
     execute!(stdout(), EnterAlternateScreen, EnableMouseCapture)?;
 
@@ -87,7 +89,7 @@ fn run<B: Backend>(t: &mut Terminal<B>, combat: &mut Combat) -> anyhow::Result<(
                     combat.run_away();
                 }
                 _ => {}
-            }
+            };
         }
     }
     Ok(())

@@ -14,7 +14,7 @@ const DODGE_CAP: u16 = 20;
 const ERROR_RANGE_PERCENTAGE: u16 = 20;
 
 // Default value caps
-const DAMAGE_CAP: u16 = u16::MAX;
+const DAMAGE_CAP: u16 = u16::MAX / 2;
 
 pub struct Entity {
     pub name: String,
@@ -27,14 +27,19 @@ pub struct Entity {
 impl New for Entity {
     fn new(name: String, full_hp: u16, damage: u16, armor: u16, dodge: u16) -> Self {
         let real_armor = if armor > ARMOR_CAP { ARMOR_CAP } else { armor };
-        let _real_dodge = if dodge > DODGE_CAP { DODGE_CAP } else { dodge };
+        let real_dodge = if dodge > DODGE_CAP { DODGE_CAP } else { dodge };
+        let real_damage = if damage > DAMAGE_CAP {
+            DAMAGE_CAP
+        } else {
+            damage
+        };
         Self {
             name,
             full_hp,
             now_hp: full_hp,
-            damage,
+            damage: real_damage,
             armor: real_armor,
-            dodge,
+            dodge: real_dodge,
         }
     }
 }
@@ -49,8 +54,13 @@ impl Fight for Entity {
         let damage_with_errors =
             rand::thread_rng().gen_range(error_less_damage..=error_more_damage);
 
-        let real_damage = (100 - self.armor) * damage_with_errors / 100;
+        let mut real_damage = (100 - self.armor) * damage_with_errors / 100;
         if self.dodge < rand::thread_rng().gen_range(0..=100) as u16 {
+            real_damage = if real_damage > DAMAGE_CAP {
+                DAMAGE_CAP
+            } else {
+                real_damage
+            };
             if self.now_hp > real_damage {
                 self.now_hp -= real_damage
             } else {

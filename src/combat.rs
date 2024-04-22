@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::entity::{Action, Fight, Monster, New, Player};
+use crate::entity::{Fight, Monster, Player};
 use rand::Rng;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::style::Stylize;
